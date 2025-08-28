@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CryptoAnalyzerAI | AI-Powered Crypto Analysis</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --primary: #6c5ce7;
+        --secondary: #a29bfe;
+        --dark: #2d3436;
+        --light: #f5f6fa;
+        --success: #00b894;
+        --danger: #d63031;
+        --warning: #fdcb6e;
+        --gray: #dfe6e9;
+        --card-bg: rgba(255, 255, 255, 0.92);
+      }
+
+      .dark-mode {
+        --primary: #6c5ce7;
+        --secondary: #a29bfe;
+        --dark: #f5f6fa;
+        --light: #2d3436;
+        --success: #00b894;
+        --danger: #d63031;
+        --warning: #fdcb6e;
+        --gray: #636e72;
+        --card-bg: rgba(45, 52, 54, 0.92);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      body {
+        font-family: "Montserrat", sans-serif;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: var(--light);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .logo h1 {
+        font-family: "Orbitron", sans-serif;
+        font-size: 28px;
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .logo-icon {
+        font-size: 32px;
+        color: var(--primary);
+      }
+
+      .theme-toggle {
+        background: var(--card-bg);
+        border: none;
+        width: 50px;
+        height: 25px;
+        border-radius: 25px;
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        padding: 0 3px;
+      }
+
+      .toggle-circle {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary);
+        transition: transform 0.3s;
+      }
+
+      .dark-mode .toggle-circle {
+        transform: translateX(25px);
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+
+      @media (min-width: 768px) {
+        main {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (min-width: 992px) {
+        main {
+          grid-template-columns: 1fr 1.5fr;
+        }
+      }
+
+      .card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        color: var(--dark);
+      }
+
+      .card-title {
+        font-size: 20px;
+        margin-bottom: 20px;
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .select-container {
+        position: relative;
+        margin-bottom: 20px;
+      }
+
+      .select-container select {
+        width: 100%;
+        padding: 15px;
+        border-radius: 12px;
+        border: 2px solid var(--gray);
+        background: var(--card-bg);
+        color: var(--dark);
+        font-size: 16px;
+        appearance: none;
+        outline: none;
+      }
+
+      .select-container:after {
+        content: "\f078";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary);
+        pointer-events: none;
+      }
+
+      .btn {
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 12px;
+        width: 100%;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .analysis-result {
+        margin-top: 30px;
+        padding: 20px;
+        border-radius: 15px;
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .result-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .crypto-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        background: var(--gray);
+      }
+
+      .crypto-name {
+        font-size: 24px;
+        font-weight: 700;
+      }
+
+      .price {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 10px 0;
+      }
+
+      .price-change {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-bottom: 15px;
+      }
+
+      .positive {
+        background: rgba(0, 184, 148, 0.2);
+        color: var(--success);
+      }
+
+      .negative {
+        background: rgba(214, 48, 49, 0.2);
+        color: var(--danger);
+      }
+
+      .analysis-content {
+        margin-top: 20px;
+      }
+
+      .recommendation {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 15px 0;
+        padding: 10px 0;
+        border-top: 1px solid var(--gray);
+        border-bottom: 1px solid var(--gray);
+      }
+
+      .buy {
+        color: var(--success);
+      }
+
+      .sell {
+        color: var(--danger);
+      }
+
+      .hold {
+        color: var(--warning);
+      }
+
+      .analysis-details {
+        margin-top: 20px;
+      }
+
+      .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--gray);
+      }
+
+      .detail-item:last-child {
+        border-bottom: none;
+      }
+
+      .chart-container {
+        height: 300px;
+        margin-top: 20px;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 30px 0;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid var(--gray);
+        border-top: 5px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 50px;
+        padding: 20px;
+        color: var(--gray);
+        font-size: 14px;
+      }
+
+      .tooltip {
+        position: relative;
+        display: inline-block;
+        margin-left: 5px;
+        color: var(--primary);
+      }
+
+      .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: var(--dark);
+        color: var(--light);
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 12px;
+      }
+
+      .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .technical-indicators {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .indicator {
+        padding: 15px;
+        border-radius: 12px;
+        background: var(--light);
+        text-align: center;
+      }
+
+      .indicator-name {
+        font-size: 14px;
+        color: var(--dark);
+        margin-bottom: 5px;
+      }
+
+      .indicator-value {
+        font-size: 18px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="logo">
+          <i class="fas fa-coins logo-icon"></i>
+          <h1>CryptoAnalyzerAI</h1>
+        </div>
+        <button class="theme-toggle" id="themeToggle">
+          <div class="toggle-circle"></div>
+        </button>
+      </header>
+
+      <main>
+        <div class="card">
+          <h2 class="card-title">Select Cryptocurrency</h2>
+          <div class="select-container">
+            <select id="cryptoSelect">
+              <option value="">Choose a cryptocurrency</option>
+              <option value="BTC">Bitcoin (BTC)</option>
+              <option value="ETH">Ethereum (ETH)</option>
+              <option value="BNB">Binance Coin (BNB)</option>
+              <option value="ADA">Cardano (ADA)</option>
+              <option value="SOL">Solana (SOL)</option>
+              <option value="XRP">Ripple (XRP)</option>
+              <option value="DOT">Polkadot (DOT)</option>
+              <option value="DOGE">Dogecoin (DOGE)</option>
+            </select>
+          </div>
+
+          <h2 class="card-title">Analysis Parameters</h2>
+          <div class="select-container">
+            <select id="timeframeSelect">
+              <option value="1">Last 24 hours</option>
+              <option value="7" selected>Last 7 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+          </div>
+
+          <button id="analyzeBtn" class="btn">
+            <i class="fas fa-brain"></i> Analyze with AI
+          </button>
+
+          <div class="technical-indicators">
+            <div class="indicator">
+              <div class="indicator-name">
+                RSI
+                <div class="tooltip">
+                  ⓘ<span class="tooltiptext"
+                    >Relative Strength Index: Measures speed and change of price
+                    movements</span
+                  >
+                </div>
+              </div>
+              <div class="indicator-value">-</div>
+            </div>
+            <div class="indicator">
+              <div class="indicator-name">
+                MACD
+                <div class="tooltip">
+                  ⓘ<span class="tooltiptext"
+                    >Moving Average Convergence Divergence: Shows relationship
+                    between two moving averages</span
+                  >
+                </div>
+              </div>
+              <div class="indicator-value">-</div>
+            </div>
+            <div class="indicator">
+              <div class="indicator-name">
+                Bollinger Bands
+                <div class="tooltip">
+                  ⓘ<span class="tooltiptext"
+                    >Volatility bands placed above and below a moving
+                    average</span
+                  >
+                </div>
+              </div>
+              <div class="indicator-value">-</div>
+            </div>
+            <div class="indicator">
+              <div class="indicator-name">
+                Stochastic Oscillator
+                <div class="tooltip">
+                  ⓘ<span class="tooltiptext"
+                    >Momentum indicator comparing a particular closing price to
+                    a range of prices</span
+                  >
+                </div>
+              </div>
+              <div class="indicator-value">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Analysis Results</h2>
+          <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>AI is analyzing cryptocurrency data...</p>
+          </div>
+          <div class="analysis-result" id="analysisResult">
+            <div class="result-header">
+              <div class="crypto-icon">
+                <i class="fab fa-bitcoin"></i>
+              </div>
+              <div>
+                <div class="crypto-name">Select a cryptocurrency</div>
+                <div class="price">-</div>
+                <div class="price-change">-</div>
+              </div>
+            </div>
+
+            <div class="analysis-content">
+              <p>
+                Please select a cryptocurrency and click "Analyze with AI" to
+                get started.
+              </p>
+            </div>
+
+            <div class="recommendation">-</div>
+
+            <div class="analysis-details">
+              <div class="detail-item">
+                <span>AI Confidence:</span>
+                <span>-</span>
+              </div>
+              <div class="detail-item">
+                <span>Volatility:</span>
+                <span>-</span>
+              </div>
+              <div class="detail-item">
+                <span>Market Sentiment:</span>
+                <span>-</span>
+              </div>
+              <div class="detail-item">
+                <span>Next Week Prediction:</span>
+                <span>-</span>
+              </div>
+            </div>
+
+            <div class="chart-container">
+              <canvas id="priceChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer>
+        <p>
+          CryptoAnalyzerAI &copy; 2023 | Powered by Groq AI | This is for
+          demonstration purposes only and not financial advice
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      // DOM Elements
+      const themeToggle = document.getElementById("themeToggle");
+      const cryptoSelect = document.getElementById("cryptoSelect");
+      const timeframeSelect = document.getElementById("timeframeSelect");
+      const analyzeBtn = document.getElementById("analyzeBtn");
+      const loadingIndicator = document.getElementById("loadingIndicator");
+      const analysisResult = document.getElementById("analysisResult");
+      const priceChart = document.getElementById("priceChart");
+
+      // Theme Toggle
+      themeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+      });
+
+      // Analyze Button Click
+      analyzeBtn.addEventListener("click", () => {
+        const selectedCrypto = cryptoSelect.value;
+        if (!selectedCrypto) {
+          alert("Please select a cryptocurrency first.");
+          return;
+        }
+
+        // Show loading indicator
+        loadingIndicator.style.display = "block";
+        analysisResult.style.opacity = "0.3";
+
+        // Simulate API call with timeout
+        setTimeout(() => {
+          analyzeCrypto(selectedCrypto);
+        }, 2000);
+      });
+
+      // Simulated AI Analysis Function
+      function analyzeCrypto(crypto) {
+        // Hide loading indicator
+        loadingIndicator.style.display = "none";
+        analysisResult.style.opacity = "1";
+
+        // Get crypto data based on selection
+        const cryptoData = getCryptoData(crypto);
+
+        // Update UI with analysis results
+        updateAnalysisUI(cryptoData);
+
+        // Update technical indicators
+        updateTechnicalIndicators(cryptoData);
+
+        // Render price chart
+        renderPriceChart(cryptoData);
+      }
+
+      // Get simulated crypto data
+      function getCryptoData(crypto) {
+        const cryptoDetails = {
+          BTC: {
+            name: "Bitcoin",
+            icon: "fab fa-bitcoin",
+            price: 51432.78,
+            change: 2.35,
+            symbol: "BTC",
+          },
+          ETH: {
+            name: "Ethereum",
+            icon: "fab fa-ethereum",
+            price: 2987.23,
+            change: 1.87,
+            symbol: "ETH",
+          },
+          BNB: {
+            name: "Binance Coin",
+            icon: "fas fa-coins",
+            price: 378.92,
+            change: -0.42,
+            symbol: "BNB",
+          },
+          ADA: {
+            name: "Cardano",
+            icon: "fas fa-chart-line",
+            price: 0.482,
+            change: 3.21,
+            symbol: "ADA",
+          },
+          SOL: {
+            name: "Solana",
+            icon: "fas fa-bolt",
+            price: 102.45,
+            change: 5.67,
+            symbol: "SOL",
+          },
+          XRP: {
+            name: "Ripple",
+            icon: "fas fa-exchange-alt",
+            price: 0.543,
+            change: -1.23,
+            symbol: "XRP",
+          },
+          DOT: {
+            name: "Polkadot",
+            icon: "fas fa-circle",
+            price: 7.38,
+            change: 0.89,
+            symbol: "DOT",
+          },
+          DOGE: {
+            name: "Dogecoin",
+            icon: "fas fa-dog",
+            price: 0.123,
+            change: -2.56,
+            symbol: "DOGE",
+          },
+        };
+
+        const selectedCrypto = cryptoDetails[crypto];
+        const recommendations = ["BUY", "SELL", "HOLD"];
+        const confidenceLevels = ["High", "Medium", "Low"];
+        const volatilities = ["Low", "Medium", "High"];
+        const sentiments = ["Bullish", "Neutral", "Bearish"];
+        const predictions = ["Upward trend", "Sideways", "Downward trend"];
+
+        // Generate random analysis
+        const randomRecommendation =
+          recommendations[Math.floor(Math.random() * recommendations.length)];
+        const randomConfidence =
+          confidenceLevels[Math.floor(Math.random() * confidenceLevels.length)];
+        const randomVolatility =
+          volatilities[Math.floor(Math.random() * volatilities.length)];
+        const randomSentiment =
+          sentiments[Math.floor(Math.random() * sentiments.length)];
+        const randomPrediction =
+          predictions[Math.floor(Math.random() * predictions.length)];
+
+        // Generate price history data for the chart
+        const priceHistory = [];
+        const basePrice = selectedCrypto.price;
+
+        for (let i = 0; i < 30; i++) {
+          const volatility = basePrice * 0.05; // 5% volatility
+          const randomPrice =
+            basePrice + Math.random() * volatility * 2 - volatility;
+          priceHistory.push(randomPrice);
+        }
+
+        return {
+          ...selectedCrypto,
+          recommendation: randomRecommendation,
+          confidence: randomConfidence,
+          volatility: randomVolatility,
+          sentiment: randomSentiment,
+          prediction: randomPrediction,
+          priceHistory: priceHistory,
+          rsi: (Math.random() * 30 + 35).toFixed(2), // RSI between 35-65
+          macd: (Math.random() * 0.5 - 0.25).toFixed(4), // MACD between -0.25 to 0.25
+          bollinger: (Math.random() * 10 + 45).toFixed(2), // Bollinger value
+          stochastic: (Math.random() * 50 + 25).toFixed(2), // Stochastic between 25-75
+        };
+      }
+
+      // Update UI with analysis results
+      function updateAnalysisUI(data) {
+        // Update crypto info
+        const cryptoIcon = document.querySelector(".crypto-icon");
+        cryptoIcon.innerHTML = `<i class="${data.icon}"></i>`;
+
+        document.querySelector(
+          ".crypto-name"
+        ).textContent = `${data.name} (${data.symbol})`;
+        document.querySelector(
+          ".price"
+        ).textContent = `$${data.price.toLocaleString()}`;
+
+        const priceChange = document.querySelector(".price-change");
+        priceChange.textContent = `${
+          data.change > 0 ? "+" : ""
+        }${data.change.toFixed(2)}%`;
+        priceChange.className = `price-change ${
+          data.change >= 0 ? "positive" : "negative"
+        }`;
+
+        // Update recommendation
+        const recommendation = document.querySelector(".recommendation");
+        recommendation.textContent = `Recommendation: ${data.recommendation}`;
+        recommendation.className = `recommendation ${data.recommendation.toLowerCase()}`;
+
+        // Update analysis details
+        const details = document.querySelectorAll(
+          ".detail-item span:last-child"
+        );
+        details[0].textContent = data.confidence;
+        details[1].textContent = data.volatility;
+        details[2].textContent = data.sentiment;
+        details[3].textContent = data.prediction;
+
+        // Update analysis content
+        const analysisContent = document.querySelector(".analysis-content");
+        analysisContent.innerHTML = `
+                <p>Based on technical analysis using RSI, MACD, Bollinger Bands, and Stochastic Oscillator, 
+                our AI recommends <strong>${data.recommendation}</strong> for ${
+          data.name
+        }.</p>
+                <p>The market sentiment is currently <strong>${
+                  data.sentiment
+                }</strong> with <strong>${data.volatility.toLowerCase()}</strong> volatility.</p>
+            `;
+      }
+
+      // Update technical indicators
+      function updateTechnicalIndicators(data) {
+        const indicatorValues = document.querySelectorAll(".indicator-value");
+        indicatorValues[0].textContent = data.rsi;
+        indicatorValues[1].textContent = data.macd;
+        indicatorValues[2].textContent = data.bollinger;
+        indicatorValues[3].textContent = data.stochastic;
+
+        // Color code RSI
+        const rsiValue = parseFloat(data.rsi);
+        if (rsiValue > 70) {
+          indicatorValues[0].style.color = "#d63031"; // Overbought
+        } else if (rsiValue < 30) {
+          indicatorValues[0].style.color = "#00b894"; // Oversold
+        } else {
+          indicatorValues[0].style.color = "#fdcb6e"; // Neutral
+        }
+      }
+
+      // Render price chart
+      function renderPriceChart(data) {
+        const ctx = priceChart.getContext("2d");
+
+        // Destroy previous chart if it exists
+        if (window.priceChartInstance) {
+          window.priceChartInstance.destroy();
+        }
+
+        // Create new chart
+        window.priceChartInstance = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: Array.from(
+              { length: data.priceHistory.length },
+              (_, i) => i + 1
+            ),
+            datasets: [
+              {
+                label: `${data.symbol} Price History`,
+                data: data.priceHistory,
+                borderColor: "#6c5ce7",
+                backgroundColor: "rgba(108, 92, 231, 0.1)",
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: true,
+                tension: 0.3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                mode: "index",
+                intersect: false,
+                callbacks: {
+                  label: function (context) {
+                    return `Price: $${context.raw.toFixed(2)}`;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                grid: {
+                  display: false,
+                },
+                ticks: {
+                  maxTicksLimit: 6,
+                },
+              },
+              y: {
+                grid: {
+                  color: "rgba(255, 255, 255, 0.1)",
+                },
+                ticks: {
+                  callback: function (value) {
+                    return "$" + value.toLocaleString();
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // Initialize with a sample chart
+      window.onload = function () {
+        const sampleData = getCryptoData("BTC");
+        renderPriceChart(sampleData);
+      };
+    </script>
+  </body>
+</html>
